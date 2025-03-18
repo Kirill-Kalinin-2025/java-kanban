@@ -7,11 +7,10 @@ import java.util.ArrayList;
 
 
 public class Task {
-    private String title;
-    private String description;
-    private Integer id;
-    private Status status;
-    private ArrayList<Integer> subtaskId;
+    protected String title;
+    protected String description;
+    protected Integer id;
+    protected Status status;
 
     public Task(String title, String description) {
         this.title = title;
@@ -24,13 +23,10 @@ public class Task {
         this.status = status;
     }
 
-    public Task(int id, String title, String description) {
-        this(title, description);
-        this.id = id;
-    }
-
     public Task(int id, String title, String description, Status status) {
-        this(id, title, description);
+        this.id = id;
+        this.title = title;
+        this.description = description;
         this.status = status;
     }
 
@@ -66,10 +62,6 @@ public class Task {
         this.status = status;
     }
 
-    public void setSubtaskId(ArrayList<Integer> subtaskId) {
-        this.subtaskId = subtaskId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -91,9 +83,5 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 '}';
-    }
-
-    public ArrayList<Integer> getSubtaskId() {
-        return subtaskId;
     }
 }

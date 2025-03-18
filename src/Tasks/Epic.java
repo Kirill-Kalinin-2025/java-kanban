@@ -8,41 +8,35 @@ import java.util.Objects;
 public class Epic extends Task {
         private ArrayList<Integer> subtaskId;
 
-    public Epic(String title, String description, ArrayList<Integer> subtaskId) {
+    public Epic(String title, String description) {
         super(title, description);
-        this.subtaskId = subtaskId;
+        subtaskId = new ArrayList<>();
     }
 
-    public Epic(String title, String description, Status status, ArrayList<Integer> subtaskId) {
+    public Epic(String title, String description, Status status) {
         super(title, description, status);
-        this.subtaskId = subtaskId;
+        subtaskId = new ArrayList<>();
     }
 
-    public Epic(int id, String title, String description, ArrayList<Integer> subtaskId) {
-        super(id, title, description);
-        this.subtaskId = subtaskId;
-    }
-
-    public Epic(int id, String title, String description, Status status, ArrayList<Integer> subtaskId) {
+    public Epic(int id, String title, String description, Status status) {
         super(id, title, description, status);
-        this.subtaskId = subtaskId;
+        subtaskId = new ArrayList<>();
     }
 
     public ArrayList<Integer> getSubtaskId() {
-        return subtaskId;
+        return new ArrayList<>(subtaskId);
     }
 
-    public void setSubtaskId(ArrayList<Integer> subtaskId) {
-        this.subtaskId = subtaskId;
+    public void addSubtaskId(Integer id) {
+        this.subtaskId.add(id);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Epic epic = (Epic) o;
-        return Objects.equals(subtaskId, epic.subtaskId);
+    public void clearSubtaskId() {
+        this.subtaskId.clear();
+    }
+
+    public void removeSubtaskId(Integer id) {
+        this.subtaskId.remove(id);
     }
 
     @Override

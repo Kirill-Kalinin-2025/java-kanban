@@ -144,7 +144,7 @@ public class Main {
         System.out.println("Введите описание эпика: ");
         String description = scanner.nextLine();
         ArrayList<Integer> subtaskId = new ArrayList<>();
-        Epic epic = new Epic(title, description, subtaskId);
+        Epic epic = new Epic(title, description);
         taskManager.addEpic(epic);
         System.out.println("Эпик добавлен");
     }
@@ -275,7 +275,6 @@ public class Main {
             scanner.nextLine();
             subtask.setTitle(title);
             subtask.setDescription(description);
-            subtask.setEpicId(epicId);
             taskManager.updateSubtask(subtask);
             System.out.println("Подзадача обновлена");
         } else {
@@ -313,7 +312,7 @@ public class Main {
         scanner.nextLine();
         Epic epic = taskManager.getEpicById(id);
         if (epic != null) {
-            ArrayList<Subtask> subtasks = taskManager.getSubtasksOfEpic(epic);
+            ArrayList<Subtask> subtasks = taskManager.getSubtasksOfEpic(id);
             for (Subtask subtask : subtasks) {
                 System.out.println(subtask);
             }
