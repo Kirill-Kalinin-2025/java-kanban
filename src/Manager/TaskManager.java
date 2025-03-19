@@ -67,46 +67,56 @@ public class TaskManager {
 
 
     public Integer addSubtask(Subtask subtask) {
-        if (subtask.getEpicId() != 0) {
+        Epic epic = epics.get(subtask.getEpicId());
+        if (epic != null) {
             final int id = counterId();
             subtask.setId(id);
             subtasks.put(id, subtask);
-            Epic epic = epics.get(subtask.getEpicId());
-            epic.addSubtaskId(id);
+            epic.getSubtaskId().add(id);
             updateEpicInfo(epic);
             return id;
         } else {
             System.out.println("Не указан эпик");
-            return 0;
+            return -1;
         }
     }
 
-    public void updateTask(Task task) {
+    public boolean updateTask(Task task) {
         final int id = task.getId();
         if (tasks.containsKey(id)) {
             tasks.put(id, task);
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public void updateEpic(Epic epic) {
+    public boolean updateEpic(Epic epic) {
         final int id = epic.getId();
         if (epics.containsKey(id)) {
             Epic savedEpic = epics.get(id);
             savedEpic.setTitle(epic.getTitle());
             savedEpic.setDescription(epic.getDescription());
-            updateEpicInfo(savedEpic);
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public void updateSubtask(Subtask subtask) {
+    public boolean updateSubtask(Subtask subtask) {
         final int id = subtask.getId();
+        final Subtask savedSubtask = subtasks.get(id);
         if (subtasks.containsKey(id)) {
-            subtasks.put(id, subtask);
-            Epic epic = epics.get(subtask.getEpicId());
-            if (epic != null) {
-                updateEpicInfo(epic);
+            if (subtask.getEpicId() == savedSubtask.getEpicId()) {
+                subtasks.put(id, subtask);
+                Epic epic = epics.get(subtask.getEpicId());
+                if (epic != null) {
+                    updateEpicInfo(epic);
+                }
+                return true;
             }
         }
+        return false;
     }
 
     public Task getTaskById(Integer id) {
@@ -140,8 +150,6 @@ public class TaskManager {
             for (Integer subtaskId : epic.getSubtaskId()) {
                 subtasksOfEpic.add(subtasks.get(subtaskId));
             }
-        } else {
-            return new ArrayList<>();
         }
         return subtasksOfEpic;
     }
