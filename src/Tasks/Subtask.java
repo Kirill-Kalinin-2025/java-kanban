@@ -1,9 +1,10 @@
 package Tasks;
 
 import Tools.Status;
+import Tools.Type;
 
 import java.util.Objects;
-import java.util.ArrayList;
+
 
 public class Subtask extends Task {
     private final Integer epicId;
@@ -24,6 +25,7 @@ public class Subtask extends Task {
         this.epicId = epicId;
 
     }
+
 
     public int getEpicId() {
         return epicId;

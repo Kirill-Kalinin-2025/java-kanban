@@ -1,14 +1,16 @@
 import java.util.Scanner;
 import java.util.ArrayList;
+
+import Manager.Managers;
+import Manager.TaskManager;
 import Tasks.Epic;
 import Tasks.Subtask;
 import Tasks.Task;
-import Manager.TaskManager;
 
 public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
-    private static final TaskManager taskManager = new TaskManager();
+    private static final TaskManager taskManager = Managers.getDefault();
 
     public static void main(String[] args) {
         while (true) {
@@ -312,7 +314,7 @@ public class Main {
         scanner.nextLine();
         Epic epic = taskManager.getEpicById(id);
         if (epic != null) {
-            ArrayList<Subtask> subtasks = taskManager.getSubtasksOfEpic(id);
+            ArrayList<Subtask> subtasks = taskManager.getSubtasksOfEpic(epic);
             for (Subtask subtask : subtasks) {
                 System.out.println(subtask);
             }
