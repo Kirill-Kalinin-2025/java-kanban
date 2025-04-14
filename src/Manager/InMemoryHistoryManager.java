@@ -12,9 +12,13 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
-        history.add(task);
-        if (history.size() > MaxHistorySize) {
-            history.remove(0);
+        if (task != null) {
+            history.add(task);
+            if (history.size() > MaxHistorySize) {
+                history.remove(0);
+            }
+        } else {
+            System.out.println("Задача не добавлена в историю.");
         }
     }
 

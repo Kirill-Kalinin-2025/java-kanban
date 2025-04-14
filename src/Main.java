@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -165,21 +166,21 @@ public class Main {
     }
 
     public static void getTasks() {
-        ArrayList<Task> tasks = taskManager.getTasks();
+        List<Task> tasks = taskManager.getTasks();
         for (Task task : tasks) {
             System.out.println(task);
         }
     }
 
     public static void getEpics() {
-        ArrayList<Epic> epics = taskManager.getEpics();
+        List<Epic> epics = taskManager.getEpics();
         for (Epic epic : epics) {
             System.out.println(epic);
         }
     }
 
     public static void getSubtasks() {
-        ArrayList<Subtask> subtasks = taskManager.getSubtasks();
+        List<Subtask> subtasks = taskManager.getSubtasks();
         for (Subtask subtask : subtasks) {
             System.out.println(subtask);
         }
@@ -314,7 +315,7 @@ public class Main {
         scanner.nextLine();
         Epic epic = taskManager.getEpicById(id);
         if (epic != null) {
-            ArrayList<Subtask> subtasks = taskManager.getSubtasksOfEpic(epic);
+            List<Subtask> subtasks = taskManager.getSubtasksOfEpic(epic);
             for (Subtask subtask : subtasks) {
                 System.out.println(subtask);
             }
