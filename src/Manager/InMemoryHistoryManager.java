@@ -3,20 +3,76 @@ package Manager;
 import Tasks.Task;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private static final int MaxHistorySize = 10;
-    private static final List<Task> history = new ArrayList<>();
+    public class Node {
+        public Task task;
+        public Node prev;
+        public Node next;
+
+        public Node(Node prev, Task task, Node next) {
+            this.task = task;
+            this.prev = prev;
+            this.next = next;
+        }
+    }
+
+    Node first;
+    Node last;
+    Map<Integer, Node> nodes = new HashMap<>();
+
+    private void linkLast(Task task) {
+        Node newNode = new Node(last, task, null);
+        if (first == null) {
+            first = newNode;
+        } else {
+            last.next = newNode;
+        }
+        last = newNode;
+    }
+
+    private List<Task> getTasks() {
+        List<Task> history = new ArrayList<>();
+        Node curNode = first;
+        while (curNode != null) {
+            history.add(curNode.task);
+            curNode = curNode.next;
+        }
+        return history;
+    }
+
+    private void removeNode(int id) {
+        Node node = nodes.remove(id);
+        if (node == null) {
+            return;
+        }
+        if (node.prev == null) {
+            first = first.next;
+            if (first == null) {
+                last = null;
+            } else {
+                first.prev = null;
+            }
+        } else if (node.next == null) {
+            last = last.prev;
+            last.next = null;
+        } else {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+        }
+    }
+
 
     @Override
     public void add(Task task) {
         if (task != null) {
-            history.add(task);
-            if (history.size() > MaxHistorySize) {
-                history.remove(0);
-            }
+            removeNode(task.getId());
+            linkLast(task);
+            nodes.put(task.getId(), last);
         } else {
             System.out.println("Задача не добавлена в историю.");
         }
@@ -24,11 +80,11 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int id) {
-        history.remove(id);
+        removeNode(id);
     }
 
     @Override
     public List<Task> getHistory() {
-        return new ArrayList<>(history);
+        return getTasks();
     }
 }
