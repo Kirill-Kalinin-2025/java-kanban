@@ -1,14 +1,15 @@
-import Manager.Managers;
-import Manager.TaskManager;
-import Tasks.Epic;
-import Tasks.Subtask;
-import Tasks.Task;
+import manager.Managers;
+import manager.TaskManager;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Collections;
 
-import static Tools.Status.NEW;
+import static tools.Status.NEW;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -110,7 +111,6 @@ class TaskTest {
         assertEquals(s1, subtasks.get(0), "Задачи не совпадают.");
     }
 
-
     @Test
     public void delNewSubtask() {
         taskManager.delSubtaskById(s1Id);
@@ -156,5 +156,63 @@ class TaskTest {
         taskManager.delAllEpics();
 
         assertEquals(0, taskManager.getEpics().size(), "Удалены не все задачи.");
+    }
+
+    @Test
+    public void historyDuplication() {
+        taskManager.getTaskById(t1Id);
+        taskManager.getTaskById(t1Id);
+
+        List<Task> history = taskManager.getHistory();
+        assertNotEquals(Collections.emptyList(), history, "История пуста.");
+        assertEquals(1, history.size(), "Дубль в истории.");
+        assertEquals(t1, history.get(0), "Задачи не совпадают.");
+    }
+
+    @Test
+    public void historyDeleteMiddle() {
+        taskManager.getTaskById(t1Id);
+        taskManager.getTaskById(t2Id);
+        taskManager.getEpicById(e1Id);
+
+        List<Task> history = taskManager.getHistory();
+        assertEquals(3, history.size(), "Объем истории отличается от ожидаемого.");
+        assertEquals(t2, history.get(1), "Отсутствует задача в середине списка.");
+
+        taskManager.delTaskById(t2Id);
+        history = taskManager.getHistory();
+        assertEquals(2, history.size(), "Объем истории отличается от ожидаемого.");
+        assertNotEquals(t2, history.get(0), "Задача не удалена.");
+        assertNotEquals(t2, history.get(1), "Задача не удалена.");
+    }
+
+    @Test
+    public void historyDeleteFirst() {
+        taskManager.getTaskById(t1Id);
+        taskManager.getTaskById(t2Id);
+        taskManager.getEpicById(e1Id);
+
+        List<Task> history = taskManager.getHistory();
+        assertEquals(t1, history.get(0), "Отсутствует ожидаемая в начале списка задача.");
+
+        taskManager.delTaskById(t1Id);
+        history = taskManager.getHistory();
+        assertNotEquals(t1, history.get(0), "Задача не удалена.");
+        assertNotEquals(t1, history.get(1), "Задача не удалена.");
+    }
+
+    @Test
+    public void historyDeleteEnd() {
+        taskManager.getTaskById(t1Id);
+        taskManager.getTaskById(t2Id);
+        taskManager.getEpicById(e1Id);
+
+        List<Task> history = taskManager.getHistory();
+        assertEquals(e1, history.get(2), "Отсутствует ожидаемая в конце списка задача.");
+
+        taskManager.delEpicById(e1Id);
+        history = taskManager.getHistory();
+        assertNotEquals(e1, history.get(0), "Задача не удалена.");
+        assertNotEquals(e1, history.get(1), "Задача не удалена.");
     }
 }

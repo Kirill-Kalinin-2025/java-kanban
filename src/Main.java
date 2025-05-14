@@ -2,11 +2,11 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
 
-import Manager.Managers;
-import Manager.TaskManager;
-import Tasks.Epic;
-import Tasks.Subtask;
-import Tasks.Task;
+import manager.Managers;
+import manager.TaskManager;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
 
 public class Main {
 
@@ -107,7 +107,7 @@ public class Main {
         }
     }
 
-        public static void printMenu () {
+        public static void printMenu() {
             System.out.println("Выберите опцию: ");
             System.out.println("1. Добавить задачу");
             System.out.println("2. Добавить эпик");
@@ -324,7 +324,7 @@ public class Main {
         }
     }
 
-        public static void exit () {
+        public static void exit() {
             System.out.println("Выход");
             scanner.close();
         }
