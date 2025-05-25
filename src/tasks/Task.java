@@ -30,6 +30,7 @@ public class Task {
         this.description = description;
         this.status = status;
     }
+
     public Task(int id, TypeOfTask type, String title, String description, Status status) {
         this.id = id;
         this.title = title;
