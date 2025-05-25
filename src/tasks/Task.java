@@ -1,6 +1,7 @@
 package tasks;
 
 import tools.Status;
+import tools.TypeOfTask;
 
 import java.util.Objects;
 
@@ -10,6 +11,7 @@ public class Task {
     protected String description;
     protected Integer id;
     protected Status status;
+    protected TypeOfTask type;
 
     public Task(String title, String description) {
         this.title = title;
@@ -27,6 +29,21 @@ public class Task {
         this.title = title;
         this.description = description;
         this.status = status;
+    }
+    public Task(int id, TypeOfTask type, String title, String description, Status status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.type = type;
+    }
+
+    public TypeOfTask getType() {
+        return type;
+    }
+
+    public void setType(TypeOfTask type) {
+        this.type = type;
     }
 
     public String getDescription() {
@@ -71,13 +88,14 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, description, id, status);
+        return Objects.hash(id, type, title, description, status);
     }
 
     @Override
     public String toString() {
         return "Tasks.Task{" +
                 "id=" + id +
+                ", typeOfTask=" + type +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
