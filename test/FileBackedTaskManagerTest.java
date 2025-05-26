@@ -29,7 +29,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void addTaskToFile() {
+    void addTaskToFile() {
         int t1Id = taskManagerFile.addTask(t1);
         String taskFromManager = taskManagerFile.getTaskById(t1Id).toString();
         String taskFromFile = FileBackedTaskManager.loadFromFile(file).getTaskById(t1Id).toString();
@@ -38,13 +38,13 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    public void emptyHistory() {
+    void emptyHistory() {
         taskManagerFile.addTask(t1);
         assertTrue(taskManagerFile.getHistory().isEmpty(), "История не пуста");
     }
 
     @Test
-    public void addHistory() {
+    void addHistory() {
         int t1Id = taskManagerFile.addTask(t1);
         int t2Id = taskManagerFile.addTask(t2);
         taskManagerFile.getTaskById(t1Id);

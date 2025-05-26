@@ -55,6 +55,35 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    protected void addTaskToStorage(Task task) {
+        switch (task.getType()) {
+            case TASK:
+                tasks.put(task.getId(), task);
+                break;
+            case EPIC:
+                epics.put(task.getId(), (Epic) task);
+                break;
+            case SUBTASK:
+                subtasks.put(task.getId(), (Subtask) task);
+                Epic epic = epics.get(((Subtask) task).getEpicId());
+                if (epic != null) {
+                    epic.addSubtaskId(task.getId());
+                }
+                break;
+        }
+    }
+
+    protected Task getTaskFromStorage(int id) {
+        Task task = tasks.get(id);
+        if (task == null) {
+            task = epics.get(id);
+        }
+        if (task == null) {
+            task = subtasks.get(id);
+        }
+        return task;
+    }
+
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
