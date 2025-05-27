@@ -23,6 +23,10 @@ public class InMemoryTaskManager implements TaskManager {
         return id;
     }
 
+    protected void setId(int id) {
+        this.id = id;
+    }
+
     private void updateEpicInfo(Epic epic) {
         if (epic.getSubtaskId().isEmpty()) {
             epic.setStatus(Status.NEW);

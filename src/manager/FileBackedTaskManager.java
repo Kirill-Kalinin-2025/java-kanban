@@ -29,6 +29,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             String line;
             boolean isFirstLine = true;
+            int maxId = 0;
             while ((line = fileReader.readLine()) != null) {
                 if (line.isEmpty()) {
                     break;
@@ -40,8 +41,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Task task = fromString(line);
                 if (task != null) {
                     fileBackedTaskManager.addTaskToStorage(task);
+                    maxId = Math.max(maxId, task.getId());
                 }
             }
+            fileBackedTaskManager.setId(maxId);
+
             // Чтение истории
             if ((line = fileReader.readLine()) != null) {
                 String[] ids = line.split(",");
@@ -225,18 +229,5 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void delSubtaskById(Integer id) {
         super.delSubtaskById(id);
         save();
-    }
-
-    @Override
-    protected void addTaskToStorage(Task task) {
-        super.addTaskToStorage(task);
-        save();
-    }
-
-    @Override
-    protected Task getTaskFromStorage(int id) {
-        Task task = super.getTaskFromStorage(id);
-        save();
-        return task;
     }
 }
