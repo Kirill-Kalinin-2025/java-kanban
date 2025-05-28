@@ -23,6 +23,10 @@ public class InMemoryTaskManager implements TaskManager {
         return id;
     }
 
+    protected void setId(int id) {
+        this.id = id;
+    }
+
     private void updateEpicInfo(Epic epic) {
         if (epic.getSubtaskId().isEmpty()) {
             epic.setStatus(Status.NEW);
@@ -53,6 +57,35 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
+    }
+
+    protected void addTaskToStorage(Task task) {
+        switch (task.getType()) {
+            case TASK:
+                tasks.put(task.getId(), task);
+                break;
+            case EPIC:
+                epics.put(task.getId(), (Epic) task);
+                break;
+            case SUBTASK:
+                subtasks.put(task.getId(), (Subtask) task);
+                Epic epic = epics.get(((Subtask) task).getEpicId());
+                if (epic != null) {
+                    epic.addSubtaskId(task.getId());
+                }
+                break;
+        }
+    }
+
+    protected Task getTaskFromStorage(int id) {
+        Task task = tasks.get(id);
+        if (task == null) {
+            task = epics.get(id);
+        }
+        if (task == null) {
+            task = subtasks.get(id);
+        }
+        return task;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package tasks;
 
 import tools.Status;
+import tools.TypeOfTask;
 
 import java.util.Objects;
 
@@ -25,6 +26,11 @@ public class Subtask extends Task {
 
     }
 
+    public Subtask(int id, TypeOfTask type, String title, String description, Status status, int epicId) {
+        super(id, type, title, description, status);
+        this.epicId = epicId;
+    }
+
 
     public int getEpicId() {
         return epicId;
@@ -39,6 +45,7 @@ public class Subtask extends Task {
     public String toString() {
         return "Subtask{" +
                 "id=" + getId() +
+                ", typeOfTask=" + getType() +
                 ", title='" + getTitle() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", status=" + getStatus() +
