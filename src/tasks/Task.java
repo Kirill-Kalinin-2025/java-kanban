@@ -3,6 +3,8 @@ package tasks;
 import tools.Status;
 import tools.TypeOfTask;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 
@@ -12,6 +14,9 @@ public class Task {
     protected Integer id;
     protected Status status;
     protected TypeOfTask type;
+    protected Duration duration;
+    protected LocalDateTime startTime;
+    protected LocalDateTime endTime;
 
     public Task(String title, String description) {
         this.title = title;
@@ -37,6 +42,25 @@ public class Task {
         this.description = description;
         this.status = status;
         this.type = type;
+    }
+
+    public Task(int id, TypeOfTask type, String title, String description, Status status, LocalDateTime startTime, Duration duration) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.type = type;
+        this.startTime = startTime;
+        this.duration = duration;
+        getEndTime();
+    }
+
+    public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) {
+            return null;
+        } else {
+            return startTime.plus(duration);
+        }
     }
 
     public TypeOfTask getType() {
@@ -79,6 +103,22 @@ public class Task {
         this.status = status;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+    
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -89,7 +129,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, title, description, status);
+        return Objects.hash(id, type, title, description, status, startTime, duration);
     }
 
     @Override
@@ -100,6 +140,9 @@ public class Task {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", startTime=" + startTime +
+                ", duration=" + duration +
+                ", endTime=" + getEndTime() +
                 '}';
     }
 }

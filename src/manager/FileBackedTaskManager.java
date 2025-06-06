@@ -1,5 +1,6 @@
 package manager;
 
+import exception.InputException;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
@@ -36,7 +37,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
                 if (isFirstLine) {
                     isFirstLine = false;
-                    continue; // Skip the header line
+                    continue;
                 }
                 Task task = fromString(line);
                 if (task != null) {
@@ -46,7 +47,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
             fileBackedTaskManager.setId(maxId);
 
-            // Чтение истории
             if ((line = fileReader.readLine()) != null) {
                 String[] ids = line.split(",");
                 for (String id : ids) {
@@ -121,7 +121,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     protected String toString(Task task) {
         StringBuilder taskString = new StringBuilder();
         taskString.append(String.format("%d, %s, %s, %s, %s",
-                task.getId(), task.getType(), task.getTitle(), task.getStatus(), task.getDescription()));
+                task.getId(), task.getType(), task.getTitle(), task.getStatus(), task.getDescription(), task.getStartTime(), task.getDuration(), task.getEndTime()));
         if (task.getType() == TypeOfTask.SUBTASK) {
             taskString.append(", ").append(((Subtask) task).getEpicId());
         }
@@ -136,7 +136,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Integer addTask(Task task) {
+    public Integer addTask(Task task) throws InputException {
         Integer id = super.addTask(task);
         save();
         return id;
@@ -150,7 +150,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Integer addSubtask(Subtask subtask) {
+    public Integer addSubtask(Subtask subtask) throws InputException {
         Integer id = super.addSubtask(subtask);
         save();
         return id;
@@ -178,7 +178,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws InputException {
         super.updateTask(task);
         save();
     }
@@ -190,7 +190,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
+    public void updateSubtask(Subtask subtask) throws InputException {
         super.updateSubtask(subtask);
         save();
     }

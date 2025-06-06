@@ -1,3 +1,4 @@
+import exception.InputException;
 import manager.FileBackedTaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    void addTaskToFile() {
+    void addTaskToFile() throws InputException {
         int t1Id = taskManagerFile.addTask(t1);
         String taskFromManager = taskManagerFile.getTaskById(t1Id).toString();
         String taskFromFile = FileBackedTaskManager.loadFromFile(file).getTaskById(t1Id).toString();
@@ -38,13 +39,13 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    void emptyHistory() {
+    void emptyHistory() throws InputException {
         taskManagerFile.addTask(t1);
         assertTrue(taskManagerFile.getHistory().isEmpty(), "История не пуста");
     }
 
     @Test
-    void addHistory() {
+    void addHistory() throws InputException {
         int t1Id = taskManagerFile.addTask(t1);
         int t2Id = taskManagerFile.addTask(t2);
         taskManagerFile.getTaskById(t1Id);

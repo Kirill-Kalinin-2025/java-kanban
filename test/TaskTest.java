@@ -1,3 +1,4 @@
+import exception.InputException;
 import manager.Managers;
 import manager.TaskManager;
 import tasks.Epic;
@@ -18,8 +19,11 @@ class TaskTest {
     TaskManager taskManager = Managers.getDefault();
     private int epicId;
 
+    TaskTest() throws InputException {
+    }
+
     @Test
-    void addNewTask() {
+    void addNewTask() throws InputException {
         Task task = new Task("Test addNewTask", "Test addNewTask description", NEW);
         final int taskId = taskManager.addTask(task);
 

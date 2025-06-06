@@ -1,25 +1,29 @@
 package manager;
 
+import exception.InputException;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
+    Set<Task> getPrioritizedTasks();
+
     List<Task> getHistory();
 
-    Integer addTask(Task task);
+    Integer addTask(Task task) throws InputException;
 
     Integer addEpic(Epic epic);
 
-    Integer addSubtask(Subtask subtask);
+    Integer addSubtask(Subtask subtask) throws InputException;
 
-    void updateTask(Task task);
+    void updateTask(Task task) throws InputException;
 
     void updateEpic(Epic epic);
 
-    void updateSubtask(Subtask subtask);
+    void updateSubtask(Subtask subtask) throws InputException;
 
     List<Task> getTasks();
 

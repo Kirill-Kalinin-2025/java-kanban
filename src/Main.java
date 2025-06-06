@@ -2,6 +2,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
 
+import exception.InputException;
 import manager.Managers;
 import manager.TaskManager;
 import tasks.Epic;
@@ -13,7 +14,7 @@ public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final TaskManager taskManager = Managers.getDefault();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InputException {
         while (true) {
             System.out.println();
             printMenu();
@@ -131,7 +132,7 @@ public class Main {
             System.out.println("20. Выход");
         }
 
-    public static void addTask() {
+    public static void addTask() throws InputException {
         System.out.println("Введите заголовок задачи: ");
         String title = scanner.nextLine();
         System.out.println("Введите описание задачи: ");
@@ -152,7 +153,7 @@ public class Main {
         System.out.println("Эпик добавлен");
     }
 
-    public static void addSubtask() {
+    public static void addSubtask() throws InputException {
         System.out.println("Введите заголовок подзадачи: ");
         String title = scanner.nextLine();
         System.out.println("Введите описание подзадачи: ");
@@ -225,7 +226,7 @@ public class Main {
         System.out.println(subtask);
     }
 
-    public static void updateTask() {
+    public static void updateTask() throws InputException {
         System.out.println("Введите id задачи, которую хотите обновить:");
         int id = scanner.nextInt();
         scanner.nextLine();
@@ -263,7 +264,7 @@ public class Main {
         }
     }
 
-    public static void updateSubtask() {
+    public static void updateSubtask() throws InputException {
         System.out.println("Введите id подзадачи, которую хотите обновить:");
         int id = scanner.nextInt();
         scanner.nextLine();
