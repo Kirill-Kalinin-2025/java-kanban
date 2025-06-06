@@ -9,15 +9,17 @@ import tools.TypeOfTask;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private final File file;
 
     public FileBackedTaskManager(File file) {
+        super();
         this.file = file;
     }
 
@@ -31,13 +33,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             String line;
             boolean isFirstLine = true;
             int maxId = 0;
+            // Считаем задачи
             while ((line = fileReader.readLine()) != null) {
                 if (line.isEmpty()) {
+                    // Пустая строка — далее история
                     break;
                 }
                 if (isFirstLine) {
                     isFirstLine = false;
-                    continue;
+                    continue; // пропускаем заголовок
                 }
                 Task task = fromString(line);
                 if (task != null) {
@@ -47,17 +51,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
             fileBackedTaskManager.setId(maxId);
 
-            if ((line = fileReader.readLine()) != null) {
+            // Считаем историю, следующая строка после пустой
+            if ((line = fileReader.readLine()) != null && !line.isEmpty()) {
                 String[] ids = line.split(",");
-                for (String id : ids) {
+                for (String idStr : ids) {
                     try {
-                        int taskId = Integer.parseInt(id.trim());
+                        int taskId = Integer.parseInt(idStr.trim());
                         Task task = fileBackedTaskManager.getTaskFromStorage(taskId);
                         if (task != null) {
                             fileBackedTaskManager.historyManager.add(task);
                         }
                     } catch (NumberFormatException e) {
-                        System.out.println("Некорректный идентификатор задачи в истории: " + id);
+                        System.out.println("Некорректный идентификатор задачи в истории: " + idStr);
                     }
                 }
             }
@@ -69,23 +74,32 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private static Task fromString(String value) {
         String[] parts = value.split(", ");
-        if (parts.length < 5) return null;
+        if (parts.length < 7) return null;
 
         int id = Integer.parseInt(parts[0]);
         TypeOfTask type = TypeOfTask.valueOf(parts[1]);
         String title = parts[2];
         String status = parts[3];
         String description = parts[4];
+        LocalDateTime startTime = null;
+        Duration duration = null;
+
+        if (!"null".equals(parts[5])) {
+            startTime = LocalDateTime.parse(parts[5]);
+        }
+        if (!"null".equals(parts[6])) {
+            duration = Duration.parse(parts[6]);
+        }
 
         switch (type) {
             case TASK:
-                return new Task(id, type, title, description, Status.valueOf(status));
+                return new Task(id, type, title, description, Status.valueOf(status), startTime, duration);
             case EPIC:
-                return new Epic(id, type, title, description, Status.valueOf(status));
+                return new Epic(id, type, title, description, Status.valueOf(status), startTime, duration);
             case SUBTASK:
-                if (parts.length < 6) return null;
-                int epicId = Integer.parseInt(parts[5]);
-                return new Subtask(id, type, title, description, Status.valueOf(status), epicId);
+                if (parts.length < 8) return null;
+                int epicId = Integer.parseInt(parts[7]);
+                return new Subtask(id, type, title, description, Status.valueOf(status), startTime, duration, epicId);
             default:
                 return null;
         }
@@ -102,14 +116,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return historyString.toString();
     }
 
+    @Override
     protected void save() {
-        List<Task> allTask = new ArrayList<>();
-        allTask.addAll(getTasks());
-        allTask.addAll(getEpics());
-        allTask.addAll(getSubtasks());
+        List<Task> allTasks = new ArrayList<>();
+        allTasks.addAll(getTasks());
+        allTasks.addAll(getEpics());
+        allTasks.addAll(getSubtasks());
+
         try (FileWriter fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
-            fileWriter.write("id,type,name,status,description,epic\n");
-            for (Task task : allTask) {
+            fileWriter.write("id, type, name, status, description, startTime, duration, epic\n");
+            for (Task task : allTasks) {
                 fileWriter.write(toString(task));
             }
             fileWriter.write("\n" + historyToString(historyManager));
@@ -118,10 +134,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
+    @Override
     protected String toString(Task task) {
         StringBuilder taskString = new StringBuilder();
-        taskString.append(String.format("%d, %s, %s, %s, %s",
-                task.getId(), task.getType(), task.getTitle(), task.getStatus(), task.getDescription(), task.getStartTime(), task.getDuration(), task.getEndTime()));
+        taskString.append(String.format("%d, %s, %s, %s, %s, %s, %s",
+                task.getId(),
+                task.getType(),
+                task.getTitle(),
+                task.getStatus(),
+                task.getDescription(),
+                task.getStartTime() != null ? task.getStartTime().toString() : "null",
+                task.getDuration() != null ? task.getDuration().toString() : "null"));
         if (task.getType() == TypeOfTask.SUBTASK) {
             taskString.append(", ").append(((Subtask) task).getEpicId());
         }

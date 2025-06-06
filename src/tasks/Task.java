@@ -22,6 +22,8 @@ public class Task {
         this.title = title;
         this.description = description;
         this.status = Status.NEW;
+        this.startTime = LocalDateTime.now(); // Устанавливаем текущее время как время начала
+        this.duration = Duration.ZERO; // Устанавливаем нулевую продолжительность по умолчанию
     }
 
     public Task(String title, String description, Status status) {
@@ -30,29 +32,20 @@ public class Task {
     }
 
     public Task(int id, String title, String description, Status status) {
+        this(title, description, status);
         this.id = id;
-        this.title = title;
-        this.description = description;
-        this.status = status;
     }
 
     public Task(int id, TypeOfTask type, String title, String description, Status status) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.status = status;
+        this(id, title, description, status);
         this.type = type;
     }
 
     public Task(int id, TypeOfTask type, String title, String description, Status status, LocalDateTime startTime, Duration duration) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.status = status;
-        this.type = type;
+        this(id, type, title, description, status);
         this.startTime = startTime;
         this.duration = duration;
-        getEndTime();
+        this.endTime = getEndTime();
     }
 
     public LocalDateTime getEndTime() {
@@ -106,7 +99,7 @@ public class Task {
     public Duration getDuration() {
         return duration;
     }
-    
+
     public void setDuration(Duration duration) {
         this.duration = duration;
     }

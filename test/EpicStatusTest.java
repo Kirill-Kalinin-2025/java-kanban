@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static tools.Status.DONE;
 import static tools.Status.NEW;
 import static tools.Status.IN_PROGRESS;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EpicStatusTest {
     TaskManager taskManager = Managers.getDefault();
@@ -22,7 +23,7 @@ public class EpicStatusTest {
             NEW, null, null, new ArrayList<>());
     int e1Id = taskManager.addEpic(e1);
 
-    public EpicStatusTest() throws IOException, InterruptedException {
+    public EpicStatusTest() throws InputException, IOException, InterruptedException {
     }
 
     @Test

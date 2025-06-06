@@ -8,6 +8,8 @@ import tools.TypeOfTask;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,8 +26,10 @@ public class FileBackedTaskManagerTest {
     public void setUp() throws IOException {
         file = new File("file.csv");
         taskManagerFile = new FileBackedTaskManager(file);
-        t1 = new Task(1, TypeOfTask.TASK, "t1", "T", NEW);
-        t2 = new Task(2, TypeOfTask.TASK, "t2", "T", NEW);
+        t1 = new Task(1, TypeOfTask.TASK, "t1", "T", NEW,
+                LocalDateTime.of(2025, 6, 6, 16, 0), Duration.ofMinutes(3));
+        t2 = new Task(2, TypeOfTask.TASK, "t2", "T", NEW,
+                LocalDateTime.of(2025, 6, 6, 16, 30), Duration.ofMinutes(3));
         new PrintWriter(file).close();
     }
 
