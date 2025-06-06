@@ -1,3 +1,4 @@
+import exception.InputException;
 import manager.FileBackedTaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,8 @@ import tools.TypeOfTask;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,13 +26,15 @@ public class FileBackedTaskManagerTest {
     public void setUp() throws IOException {
         file = new File("file.csv");
         taskManagerFile = new FileBackedTaskManager(file);
-        t1 = new Task(1, TypeOfTask.TASK, "t1", "T", NEW);
-        t2 = new Task(2, TypeOfTask.TASK, "t2", "T", NEW);
+        t1 = new Task(1, TypeOfTask.TASK, "t1", "T", NEW,
+                LocalDateTime.of(2025, 6, 6, 16, 0), Duration.ofMinutes(3));
+        t2 = new Task(2, TypeOfTask.TASK, "t2", "T", NEW,
+                LocalDateTime.of(2025, 6, 6, 16, 30), Duration.ofMinutes(3));
         new PrintWriter(file).close();
     }
 
     @Test
-    void addTaskToFile() {
+    void addTaskToFile() throws InputException {
         int t1Id = taskManagerFile.addTask(t1);
         String taskFromManager = taskManagerFile.getTaskById(t1Id).toString();
         String taskFromFile = FileBackedTaskManager.loadFromFile(file).getTaskById(t1Id).toString();
@@ -38,13 +43,13 @@ public class FileBackedTaskManagerTest {
     }
 
     @Test
-    void emptyHistory() {
+    void emptyHistory() throws InputException {
         taskManagerFile.addTask(t1);
         assertTrue(taskManagerFile.getHistory().isEmpty(), "История не пуста");
     }
 
     @Test
-    void addHistory() {
+    void addHistory() throws InputException {
         int t1Id = taskManagerFile.addTask(t1);
         int t2Id = taskManagerFile.addTask(t2);
         taskManagerFile.getTaskById(t1Id);
