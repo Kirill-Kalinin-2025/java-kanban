@@ -16,14 +16,13 @@ public class Task {
     protected TypeOfTask type;
     protected Duration duration;
     protected LocalDateTime startTime;
-    protected LocalDateTime endTime;
 
     public Task(String title, String description) {
         this.title = title;
         this.description = description;
         this.status = Status.NEW;
-        this.startTime = LocalDateTime.now(); // Устанавливаем текущее время как время начала
-        this.duration = Duration.ZERO; // Устанавливаем нулевую продолжительность по умолчанию
+        this.startTime = null;
+        this.duration = Duration.ZERO;
     }
 
     public Task(String title, String description, Status status) {
@@ -45,15 +44,6 @@ public class Task {
         this(id, type, title, description, status);
         this.startTime = startTime;
         this.duration = duration;
-        this.endTime = getEndTime();
-    }
-
-    public LocalDateTime getEndTime() {
-        if (startTime == null || duration == null) {
-            return null;
-        } else {
-            return startTime.plus(duration);
-        }
     }
 
     public TypeOfTask getType() {
@@ -110,6 +100,14 @@ public class Task {
 
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) {
+            return null;
+        } else {
+            return startTime.plus(duration);
+        }
     }
 
     @Override

@@ -33,10 +33,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             String line;
             boolean isFirstLine = true;
             int maxId = 0;
-            // Считаем задачи
+            // Читаем задачи
             while ((line = fileReader.readLine()) != null) {
                 if (line.isEmpty()) {
-                    // Пустая строка — далее история
                     break;
                 }
                 if (isFirstLine) {
@@ -51,23 +50,30 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
             fileBackedTaskManager.setId(maxId);
 
-            // Считаем историю, следующая строка после пустой
+            // Читаем историю задач
             if ((line = fileReader.readLine()) != null && !line.isEmpty()) {
                 String[] ids = line.split(",");
-                for (String idStr : ids) {
-                    try {
-                        int taskId = Integer.parseInt(idStr.trim());
-                        Task task = fileBackedTaskManager.getTaskFromStorage(taskId);
-                        if (task != null) {
-                            fileBackedTaskManager.historyManager.add(task);
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Некорректный идентификатор задачи в истории: " + idStr);
-                    }
-                }
+                // Заменяем цикл for на stream()
+                java.util.Arrays.stream(ids)
+                        .map(String::trim)
+                        .mapToInt(idStr -> {
+                            try {
+                                return Integer.parseInt(idStr);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Некорректный идентификатор задачи в истории: " + idStr);
+                                return -1;
+                            }
+                        })
+                        .filter(id -> id != -1)
+                        .forEach(taskId -> {
+                            Task task = fileBackedTaskManager.getTaskFromStorage(taskId);
+                            if (task != null) {
+                                fileBackedTaskManager.historyManager.add(task);
+                            }
+                        });
             }
         } catch (IOException e) {
-            throw new ManagerSaveException("Произошла ошибка во время чтения файла.", e);
+            throw new ManagerSaveException("Произошла ошибка при чтении файла.", e);
         }
         return fileBackedTaskManager;
     }
@@ -81,21 +87,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String title = parts[2];
         String status = parts[3];
         String description = parts[4];
-        LocalDateTime startTime = null;
-        Duration duration = null;
 
-        if (!"null".equals(parts[5])) {
-            startTime = LocalDateTime.parse(parts[5]);
-        }
-        if (!"null".equals(parts[6])) {
-            duration = Duration.parse(parts[6]);
-        }
+        LocalDateTime startTime = "null".equals(parts[5]) ? null : LocalDateTime.parse(parts[5]);
+        Duration duration = "null".equals(parts[6]) ? null : Duration.parse(parts[6]);
 
         switch (type) {
             case TASK:
                 return new Task(id, type, title, description, Status.valueOf(status), startTime, duration);
             case EPIC:
-                return new Epic(id, type, title, description, Status.valueOf(status), startTime, duration);
+                LocalDateTime endTime = null;
+                if (parts.length > 7) {
+                    endTime = "null".equals(parts[7]) ? null : LocalDateTime.parse(parts[7]);
+                }
+                Epic epic = new Epic(id, type, title, description, Status.valueOf(status), startTime, duration);
+                epic.setEndTime(endTime);
+                return epic;
             case SUBTASK:
                 if (parts.length < 8) return null;
                 int epicId = Integer.parseInt(parts[7]);
@@ -105,17 +111,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    protected static String historyToString(HistoryManager manager) {
-        StringBuilder historyString = new StringBuilder();
-        for (Task task : manager.getHistory()) {
-            historyString.append(task.getId()).append(", ");
-        }
-        if (historyString.length() > 2) {
-            historyString.setLength(historyString.length() - 2);
-        }
-        return historyString.toString();
-    }
-
     @Override
     protected void save() {
         List<Task> allTasks = new ArrayList<>();
@@ -123,33 +118,53 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         allTasks.addAll(getEpics());
         allTasks.addAll(getSubtasks());
 
-        try (FileWriter fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
-            fileWriter.write("id, type, name, status, description, startTime, duration, epic\n");
-            for (Task task : allTasks) {
-                fileWriter.write(toString(task));
-            }
-            fileWriter.write("\n" + historyToString(historyManager));
+        try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
+            writer.write("id, type, name, status, description, startTime, duration, endTime, epic\n");
+            allTasks.stream()
+                    .map(this::toString)
+                    .forEach(line -> {
+                        try {
+                            writer.write(line);
+                        } catch (IOException e) {
+                            throw new ManagerSaveException("Ошибка записи задачи в файл.", e);
+                        }
+                    });
+            writer.write("\n" + historyToString(historyManager));
         } catch (IOException e) {
-            throw new ManagerSaveException("Произошла ошибка во время записи файла.", e);
+            throw new ManagerSaveException("Произошла ошибка при записи файла.", e);
         }
     }
 
     @Override
     protected String toString(Task task) {
-        StringBuilder taskString = new StringBuilder();
-        taskString.append(String.format("%d, %s, %s, %s, %s, %s, %s",
-                task.getId(),
-                task.getType(),
-                task.getTitle(),
-                task.getStatus(),
-                task.getDescription(),
-                task.getStartTime() != null ? task.getStartTime().toString() : "null",
-                task.getDuration() != null ? task.getDuration().toString() : "null"));
-        if (task.getType() == TypeOfTask.SUBTASK) {
-            taskString.append(", ").append(((Subtask) task).getEpicId());
+        StringBuilder sb = new StringBuilder();
+        sb.append(task.getId()).append(", ")
+                .append(task.getType()).append(", ")
+                .append(task.getTitle()).append(", ")
+                .append(task.getStatus()).append(", ")
+                .append(task.getDescription()).append(", ")
+                .append(task.getStartTime() != null ? task.getStartTime() : "null").append(", ")
+                .append(task.getDuration() != null ? task.getDuration() : "null");
+
+        if (task instanceof Epic) {
+            LocalDateTime epicEndTime = ((Epic) task).getEndTime();
+            sb.append(", ").append(epicEndTime != null ? epicEndTime : "null");
+            sb.append(", ");
+        } else if (task instanceof Subtask) {
+            sb.append(", null");
+            sb.append(", ").append(((Subtask) task).getEpicId());
+        } else {
+            sb.append(", null, null");
         }
-        taskString.append("\n");
-        return taskString.toString();
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    protected static String historyToString(HistoryManager manager) {
+        return manager.getHistory().stream()
+                .map(task -> String.valueOf(task.getId()))
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
     }
 
     static class ManagerSaveException extends RuntimeException {
