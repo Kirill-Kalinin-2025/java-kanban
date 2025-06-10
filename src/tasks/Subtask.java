@@ -3,6 +3,8 @@ package tasks;
 import tools.Status;
 import tools.TypeOfTask;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 
@@ -31,6 +33,10 @@ public class Subtask extends Task {
         this.epicId = epicId;
     }
 
+    public Subtask(int id, TypeOfTask type, String title, String description, Status status, LocalDateTime startTime, Duration duration, int epicId) {
+        super(id, type, title, description, status, startTime, duration);
+        this.epicId = epicId;
+    }
 
     public int getEpicId() {
         return epicId;
@@ -49,6 +55,9 @@ public class Subtask extends Task {
                 ", title='" + getTitle() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", status=" + getStatus() +
+                ", startTime=" + startTime +
+                ", duration=" + duration +
+                ", endTime=" + getEndTime() +
                 ", epicId=" + epicId +
                 '}';
     }

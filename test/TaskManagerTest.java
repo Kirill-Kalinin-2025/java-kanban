@@ -1,25 +1,69 @@
+import exception.InputException;
+import manager.InMemoryTaskManager;
 import manager.Managers;
 import manager.TaskManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.TypeOfTask;
 
-import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static tools.Status.NEW;
 import static org.junit.jupiter.api.Assertions.*;
 
+abstract class TaskManagerTest<T extends TaskManager> {
 
-class TaskTest {
+    protected TaskManager taskManager;
+    protected Task t1, t2;
+    protected Epic e1, e2;
+    protected Subtask s1, s2;
+    protected int t1Id, t2Id, e1Id, e2Id, s1Id, s2Id;
 
-    TaskManager taskManager = Managers.getDefault();
-    private int epicId;
+    abstract InMemoryTaskManager createTaskManager();
+
+    @BeforeEach
+    void setUp() throws InputException {
+        taskManager = Managers.getDefault();
+
+        t1 = new Task(0, TypeOfTask.TASK, "t1", "d", NEW,
+                LocalDateTime.of(2025, 6, 6, 16, 0), Duration.ofMinutes(1));
+        t1Id = taskManager.addTask(t1);
+
+        t2 = new Task(
+                0, TypeOfTask.TASK, "t1", "d", NEW,
+                LocalDateTime.of(2025, 6, 6, 17, 0), Duration.ofMinutes(1));
+        t2Id = taskManager.addTask(t2);
+
+        e1 = new Epic(0, TypeOfTask.EPIC, "e1", "d", NEW,
+                null, null, new ArrayList<>());
+        e1Id = taskManager.addEpic(e1);
+
+        s1 = new Subtask(
+                0, TypeOfTask.SUBTASK, "s1", "d", NEW,
+                LocalDateTime.of(2025, 6, 6, 18, 0), Duration.ofMinutes(1),
+                e1Id);
+        s1Id = taskManager.addSubtask(s1);
+
+        s2 = new Subtask(
+                0, TypeOfTask.SUBTASK, "s2", "d", NEW,
+                LocalDateTime.of(2025, 6, 6, 19, 0), Duration.ofMinutes(1),
+                e1Id);
+        s2Id = taskManager.addSubtask(s2);
+
+        e2 = new Epic(0, TypeOfTask.EPIC, "e2", "d", NEW,
+                null, null, new ArrayList<>());
+        e2Id = taskManager.addEpic(e2);
+    }
 
     @Test
-    void addNewTask() {
+    void addNewTask() throws InputException {
         Task task = new Task("Test addNewTask", "Test addNewTask description", NEW);
         final int taskId = taskManager.addTask(task);
 
@@ -36,7 +80,7 @@ class TaskTest {
     }
 
     @Test
-    void addNewEpic() {
+    void addNewEpic() throws InputException {
         Epic epic = new Epic("Test addNewEpic", "Test addNewEpic description", NEW);
         final int epicId = taskManager.addEpic(epic);
 
@@ -52,21 +96,8 @@ class TaskTest {
         assertEquals(epic, epics.get(2), "Задачи не совпадают.");
     }
 
-    Task t1 = new Task(0, "t1", "T", NEW);
-    int t1Id = taskManager.addTask(t1);
-    Task t2 = new Task(0, "t2", "T", NEW);
-    int t2Id = taskManager.addTask(t2);
-    Epic e1 = new Epic(0, "e1", "E", NEW);
-    int e1Id = taskManager.addEpic(e1);
-    Subtask s1 = new Subtask(0, "s1", "S", NEW, e1Id);
-    int s1Id = taskManager.addSubtask(s1);
-    Subtask s2 = new Subtask(0, "s2", "S", NEW, e1Id);
-    int s2Id = taskManager.addSubtask(s2);
-    Epic e2 = new Epic(0, "e2", "E", NEW);
-    int e2Id = taskManager.addEpic(e2);
-
     @Test
-    public void getNewTask() {
+    public void getNewTask() throws InputException {
         Task getT1 = taskManager.getTaskById(t1Id);
         assertNotNull(getT1, "Задача не найдена.");
         assertEquals(t1, getT1, "Задачи не совпадают.");
@@ -83,7 +114,7 @@ class TaskTest {
     @Test
     public void delNewTask() {
         taskManager.delTaskById(t1Id);
-
+        assertThrows(NullPointerException.class, () -> taskManager.getTaskById(t1Id), "Задача не удалилась");
         List<Task> tasks = taskManager.getTasks();
         assertNotNull(tasks, "Удалились все задачи.");
         assertEquals(1, tasks.size(), "Неверное количество оставшихся задач.");
@@ -92,12 +123,11 @@ class TaskTest {
     @Test
     public void delAllNewTask() {
         taskManager.delAllTasks();
-
         assertEquals(0, taskManager.getTasks().size(), "Удалены не все задачи.");
     }
 
     @Test
-    public void getNewSubtask() {
+    public void getNewSubtask() throws InputException {
         Subtask getS1 = taskManager.getSubtaskById(s1Id);
         assertNotNull(getS1, "Задача не найдена.");
         assertEquals(s1, getS1, "Задачи не совпадают.");
@@ -114,7 +144,7 @@ class TaskTest {
     @Test
     public void delNewSubtask() {
         taskManager.delSubtaskById(s1Id);
-
+        assertThrows(NullPointerException.class, () -> taskManager.getSubtaskById(s1Id), "Задача не удалилась");
         List<Subtask> subtasks = taskManager.getSubtasks();
         assertNotNull(subtasks, "Удалились все задачи.");
         assertEquals(1, subtasks.size(), "Неверное количество оставшихся задач.");
@@ -123,7 +153,6 @@ class TaskTest {
     @Test
     public void delAllNewSubtask() {
         taskManager.delAllSubtasks();
-
         assertEquals(0, taskManager.getSubtasks().size(), "Удалены не все задачи.");
     }
 
@@ -145,7 +174,7 @@ class TaskTest {
     @Test
     public void delNewEpic() {
         taskManager.delEpicById(e1Id);
-
+        assertThrows(NullPointerException.class, () -> taskManager.getEpicById(e1Id), "Задача не удалилась");
         List<Epic> epics = taskManager.getEpics();
         assertNotNull(epics, "Удалились все задачи.");
         assertEquals(1, epics.size(), "Неверное количество оставшихся задач.");
@@ -154,7 +183,6 @@ class TaskTest {
     @Test
     public void delAllNewEpic() {
         taskManager.delAllEpics();
-
         assertEquals(0, taskManager.getEpics().size(), "Удалены не все задачи.");
     }
 
