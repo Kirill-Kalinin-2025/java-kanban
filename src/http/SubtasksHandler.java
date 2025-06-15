@@ -1,9 +1,7 @@
 package http;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
-import exception.InputException;
 import manager.TaskManager;
 import tasks.Subtask;
 import java.io.IOException;
