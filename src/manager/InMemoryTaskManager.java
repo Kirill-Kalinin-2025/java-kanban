@@ -17,6 +17,11 @@ public abstract class InMemoryTaskManager implements TaskManager {
     final Map<Integer, Epic> epics = new HashMap<>();
     final Map<Integer, Subtask> subtasks = new HashMap<>();
     private int id = 0;
+    final Set<Task> prioritizedTasks = new TreeSet<>(
+            Comparator.comparing(Task::getStartTime,
+                            Comparator.nullsLast(Comparator.naturalOrder()))
+                    .thenComparing(Task::getId)
+    );
 
     public HistoryManager historyManager = Managers.getDefaultHistory();
 
@@ -120,20 +125,42 @@ public abstract class InMemoryTaskManager implements TaskManager {
         return task;
     }
 
-    private void validateTaskByDateTime(Task task) throws InputException {
-        for (Task existTask : getPrioritizedTasks()) {
-            if (existTask.getStartTime() == null || task.getStartTime() == null) {
-                continue;
-            }
-            if ((task.getStartTime().isAfter(existTask.getStartTime()) &&
-                    task.getStartTime().isBefore(existTask.getEndTime())) ||
-                    (task.getEndTime().isAfter(existTask.getStartTime()) &&
-                            task.getEndTime().isBefore(existTask.getEndTime())) ||
-                    task.getStartTime().equals(existTask.getStartTime())) {
-                throw new InputException("Создаваемая задача " + task.getTitle() +
-                        " пересекается по времени с задачей " + existTask.getTitle());
+    protected void validateTaskByDateTime(Task newTask) throws InputException {
+        // Если время не указано - пропускаем проверку
+        if (newTask.getStartTime() == null || newTask.getDuration() == null) {
+            System.out.println("[DEBUG] Пропуск валидации: задача без времени");
+            return;
+        }
+
+        System.out.println("[DEBUG] Начало валидации для: " + newTask);
+
+        // Получаем ТОЛЬКО задачи с указанным временем
+        List<Task> tasksToCheck = getPrioritizedTasks().stream()
+                .filter(t -> t.getStartTime() != null && t.getDuration() != null)
+                .filter(t -> !t.equals(newTask)) // Исключаем саму задачу
+                .toList();
+
+        if (tasksToCheck.isEmpty()) {
+            System.out.println("[DEBUG] Нет задач для проверки пересечений");
+            return;
+        }
+
+        for (Task existing : tasksToCheck) {
+            System.out.println("[DEBUG] Проверка против: " + existing);
+
+            boolean overlaps = newTask.getStartTime().isBefore(existing.getEndTime()) &&
+                    newTask.getEndTime().isAfter(existing.getStartTime());
+
+            if (overlaps) {
+                String errorMsg = String.format(
+                        "Временной конфликт: %s (%s - %s) пересекается с %s (%s - %s)",
+                        newTask.getTitle(), newTask.getStartTime(), newTask.getEndTime(),
+                        existing.getTitle(), existing.getStartTime(), existing.getEndTime());
+                System.out.println("[ERROR] " + errorMsg);
+                throw new InputException(errorMsg);
             }
         }
+        System.out.println("[DEBUG] Валидация успешно завершена");
     }
 
     @Override
@@ -163,6 +190,7 @@ public abstract class InMemoryTaskManager implements TaskManager {
         task.setId(newId);
         task.setType(TypeOfTask.TASK);
         tasks.put(newId, task);
+        prioritizedTasks.add(task);
         return newId;
     }
 
@@ -286,10 +314,12 @@ public abstract class InMemoryTaskManager implements TaskManager {
     public void delAllTasks() {
         tasks.keySet().forEach(historyManager::remove);
         tasks.clear();
+        prioritizedTasks.removeIf(task -> task.getType() == TypeOfTask.TASK);
     }
 
     @Override
     public void delAllEpics() {
+        delAllSubtasks();
         epics.keySet().forEach(historyManager::remove);
         subtasks.keySet().forEach(historyManager::remove);
         epics.clear();
@@ -304,6 +334,7 @@ public abstract class InMemoryTaskManager implements TaskManager {
             updateEpicInfo(epic);
         });
         subtasks.clear();
+        prioritizedTasks.removeIf(task -> task.getType() == TypeOfTask.SUBTASK);
     }
 
     @Override

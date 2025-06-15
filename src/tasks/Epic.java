@@ -1,5 +1,6 @@
 package tasks;
 
+import com.google.gson.annotations.SerializedName;
 import tools.Status;
 import tools.TypeOfTask;
 
@@ -9,8 +10,13 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class Epic extends Task {
-    private ArrayList<Integer> subtaskId;
     protected LocalDateTime endTime;
+    @SerializedName("subtaskId")
+    private ArrayList<Integer> subtaskId = new ArrayList<>();
+
+    public Epic() {
+        this.subtaskId = new ArrayList<>();
+    }
 
     public Epic(String title, String description) {
         super(title, description);
