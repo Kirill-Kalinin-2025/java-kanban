@@ -46,6 +46,10 @@ public class Task {
         this.duration = duration;
     }
 
+    public Task() {
+        Integer id = 0;
+    }
+
     public TypeOfTask getType() {
         return type;
     }
